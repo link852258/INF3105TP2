@@ -1,0 +1,6 @@
+exemple*
+/tests
+.vscode/
+test*
+*.o
+tp2
