@@ -15,7 +15,7 @@
 int tp2(std::istream &entree);
 void meilleurCout(const Tableau<Personne> &t);
 double calculerMeilleurDistance(Personne& p1, const Personne& p2, double meilleurCout);
-CoutTemp calculerDistanceNormal(Personne& p1, const Personne& p2);
+CoutTemp calculerDistanceNormal(Tableau<Personne>& t);
 CoutTemp calculerDistanceNormalAvecPret(Personne& p1, const Personne& p2);
 std::string meilleurRecommendation(const Personne& p1, const Personne& p2);
 std::string meilleurRecommendationPret(const Personne& p1, const Personne& p2);
@@ -62,6 +62,21 @@ int tp2(std::istream &entree_requetes)
     meilleurCout(t);
 
     return 0;
+}
+
+double methodeRecursive(int i, const Tableau<Personne>& t, Personne p1, Personne p2, int meilleurCout ){
+    meilleurCout = 2 * distance(p1.o, p1.d);
+    meilleurRecommandation = "+" + p1.nom + "-" + p1.nom + "\t" + "+" + p1.nom + "-" + p1.nom + "\t";
+    p1.liste = meilleurRecommandation;
+    for (int j = 0; j < t.taille(); j++)
+    {
+        if (i != j)
+        {
+            Personne pAutre = t[j];
+            meilleurCout = methodeRecursive(i+1, t, p1, p2, meilleurCout);
+        }
+    }
+    return 2.0;
 }
 
 void meilleurCout(const Tableau<Personne> &t)
@@ -136,14 +151,12 @@ double calculerMeilleurDistance(Personne& p1, const Personne& p2, double meilleu
     }
 }
 
-CoutTemp calculerDistanceNormal(Personne& p1, const Personne& p2){
+CoutTemp calculerDistanceNormal(Tableau<Personne>& t){
     Heure h;
     double distanceTotale = 0.0;
     double distanceCourante = 0.0;
     //aller
-    distanceCourante = distance(p1.o, p2.o);
-    distanceTotale = distanceCourante;
-    h = calculerHeureDepart(distanceCourante, p1.tabHeures[0], p2.tabHeures[0]);
+    h = calculerHeureDepart(distanceCourante, t, 0);
     distanceCourante = distance(p2.o, p2.d);
     distanceTotale += distanceCourante;
     h = h + calculerTemp(distanceCourante);
@@ -236,12 +249,21 @@ std::string meilleurRecommendationPret(const Personne& p1, const Personne& p2){
     return meilleurRecommandation;
 }
 
-Heure calculerHeureDepart(const double& distance, const Heure& h1, const Heure& h2){
-    Heure h = calculerTemp(distance);
-    if(h2 < (h1 + h)){
-        return h1 + h;
+Heure calculerHeureDepart(double& distanceTotale, const Tableau<Personne>& t, int moment){
+    double distanceCourante = 0.0;
+    Heure heureCourante = t[0].tabHeures[moment];
+    for(int i = 0; i < t.taille() - 1; i++){
+        distanceCourante = distance(t[i].o, t[i+1].o);
+        distanceTotale += distanceCourante;
+        Heure h = calculerTemp(distanceCourante);
+        if(t[i + 1].tabHeures[moment] < (heureCourante + h)){
+            heureCourante = t[i].tabHeures[moment] + h;
+        }
+        else{
+            heureCourante = t[i + 1].tabHeures[moment];
+        }
     }
-    return h2;
+    return heureCourante;
 }
 
 Heure calculerTemp(const double& distance){
